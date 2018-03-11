@@ -151,9 +151,9 @@
 
   function gotStream(stream) {
     liveStream = stream;
-    liveVideo.src = URL.createObjectURL(stream);
-    liveVideo.play();
-    // liveVideo.srcObject = stream;
+    // liveVideo.src = URL.createObjectURL(stream);
+    // liveVideo.play();
+    liveVideo.srcObject = stream;
     streamContainer.classList.remove('hidden');
     recordButton.classList.remove('hidden');
     recordButton.addEventListener('click', startRecording);
