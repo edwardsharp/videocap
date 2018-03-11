@@ -57,7 +57,9 @@
   }
 
   #livePreview,
-  #recordedClip {
+  #recordedClip,
+  #hint,
+  #allowHint {
     width: 320px;
   }
   </style>
@@ -65,8 +67,15 @@
 
 <body>
   <h1>
-      videoCAPTURE
-    </h1>
+    upload your RSVP video here. 
+  </h1>
+  <h2 id="allowHint" class="hidden">
+    you need to allow your browser to access your webcam &amp; microphone. 
+  </h2>
+  <h2 id="hint" class="hidden">
+    hint: use the Chrome or FireFox browser to record video on this page using your webcam.
+    otherwise, select a video file to upload.
+  </h2>
   <div id="streamContainer" class="hidden">
     source:
     <select id="audioSource"></select>
@@ -97,19 +106,24 @@
   const upload = document.querySelector('#upload');
   const streamContainer = document.querySelector('#streamContainer');
   const uploadStreamButton = document.querySelector('#uploadStreamButton');
+  const hint = document.querySelector('#hint');
   var liveVideo = document.getElementById('live');
   var video = document.getElementById('recording');
 
   window.onload = function() {
     recordButton = document.getElementById('record');
     stopButton = document.getElementById('stop');
+    
+    if(window.MediaRecorder){
+      navigator.mediaDevices.enumerateDevices()
+        .then(gotDevices).then(getStream).catch(handleError);
 
-    navigator.mediaDevices.enumerateDevices()
-      .then(gotDevices).then(getStream).catch(handleError);
-
-    audioSelect.onchange = getStream;
-    videoSelect.onchange = getStream;
-
+      audioSelect.onchange = getStream;
+      videoSelect.onchange = getStream;
+    }else{
+      hint.classList.remove('hidden');
+      upload.classList.remove('hidden');
+    }
   };
 
   function gotDevices(deviceInfos) {
@@ -152,8 +166,8 @@
   function gotStream(stream) {
     liveStream = stream;
     // liveVideo.src = URL.createObjectURL(stream);
-    // liveVideo.play();
     liveVideo.srcObject = stream;
+    liveVideo.play();
     streamContainer.classList.remove('hidden');
     recordButton.classList.remove('hidden');
     recordButton.addEventListener('click', startRecording);
@@ -162,7 +176,11 @@
 
   function handleError(error) {
     console.error('Error: ', error);
+    if(error.name == 'NotAllowedError'){
+      document.querySelector('#allowHint').classList.remove('hidden');
+    }
     upload.classList.remove('hidden');
+    hint.classList.remove('hidden');
   }
 
 
