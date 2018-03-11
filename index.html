@@ -151,9 +151,9 @@
 
   function gotStream(stream) {
     liveStream = stream;
-    // liveVideo.src = URL.createObjectURL(stream);
-    // liveVideo.play();
-    liveVideo.srcObject = stream;
+    liveVideo.src = URL.createObjectURL(stream);
+    liveVideo.play();
+    // liveVideo.srcObject = stream;
     streamContainer.classList.remove('hidden');
     recordButton.classList.remove('hidden');
     recordButton.addEventListener('click', startRecording);
@@ -167,18 +167,20 @@
 
 
   function startRecording() {
-    recorder = new MediaRecorder(liveStream);
-    recorder.addEventListener('dataavailable', onRecordingReady);
-    livePreview.innerHTML = 'RECORDING!';
-    recordButton.classList.add('hidden');
-    stopButton.classList.remove('hidden');
-    uploadStreamButton.classList.add('hidden');
-
-    recorder.start();
+    try{
+      recorder = new MediaRecorder(liveStream);
+      recorder.addEventListener('dataavailable', onRecordingReady);
+      livePreview.innerHTML = 'RECORDING!';
+      recordButton.classList.add('hidden');
+      stopButton.classList.remove('hidden');
+      uploadStreamButton.classList.add('hidden');
+      recorder.start();
+    }catch{
+      console.log('could not start recording!');
+    }
   }
 
   function stopRecording() {
-    console.log('STOP!');
     recordButton.classList.remove('hidden');
     stopButton.classList.add('hidden');
     livePreview.innerHTML = 'live preview';
