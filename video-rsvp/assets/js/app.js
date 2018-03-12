@@ -10,7 +10,12 @@ document.querySelectorAll('input[type=file]').forEach(function (fileInput) {
   uppy = Uppy.Core({ id: fileInput.id })
     .use(Uppy.FileInput, {
       target:             fileInput.parentNode,
-      allowMultipleFiles: fileInput.multiple
+      allowMultipleFiles: fileInput.multiple,
+      locale: {
+        strings: {
+          chooseFiles: 'choose video'
+        }
+      }
     })
     .use(Uppy.Tus, {
       endpoint: 'http://localhost:9000/'
