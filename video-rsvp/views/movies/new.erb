@@ -1,11 +1,7 @@
 <h1>VIDEO RSVP</h1>
 <h2 id="allowHint" class="hidden">
-  you need to allow your browser to access your webcam &amp; microphone. 
+  you need to allow your browser to access your webcam &amp; microphone.
 </h2>
-<small id="hint" class="hidden">
-  hint: use the Chrome or FireFox browser to record video on this page using your webcam.
-  otherwise, select a video file to upload.
-</small>
 <div id="streamContainer" class="hidden">
   <div id="videoWrapper">
     <div id="left">
@@ -37,7 +33,9 @@
   <div class="form-group">
     <input type="text" name="movie[name]" class="form-control" id="movie-name" placeholder="name" required>
   </div>
-
+  <div class="form-group">
+    <input type="text" name="movie[youtube_link]" class="form-control" id="movie-youtube_link" placeholder="youtube link" required>
+  </div>
   <div class="form-group hidden" id="upload">
     <input type="hidden" name="movie[video]" value="<%= @movie.cached_video_data %>" id="movie-video-upload-result">
     <input type="file" name="movie[video]" data-upload-result-element="movie-video-upload-result" data-preview-element="movie-video-preview" accept="video/*;capture=camcorder">
@@ -72,7 +70,6 @@
       audioSelect.onchange = getStream;
       videoSelect.onchange = getStream;
     }else{
-      hint.classList.remove('hidden');
       upload.classList.remove('hidden');
       uploadStreamButton.classList.remove('hidden');
     }
@@ -139,7 +136,6 @@
       document.querySelector('#allowHint').classList.remove('hidden');
     }
     upload.classList.remove('hidden');
-    hint.classList.remove('hidden');
     uploadStreamButton.classList.remove('hidden');
   }
 
