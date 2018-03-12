@@ -1,0 +1,182 @@
+<h1>VIDEO RSVP</h1>
+<h2 id="allowHint" class="hidden">
+  you need to allow your browser to access your webcam &amp; microphone. 
+</h2>
+<h2 id="hint" class="hidden">
+  hint: use the Chrome or FireFox browser to record video on this page using your webcam.
+  otherwise, select a video file to upload.
+</h2>
+<div id="streamContainer" class="hidden">
+  <div id="videoWrapper">
+    <div id="left">
+      <video id="live" width="320" muted></video>
+      <div id="source">
+        <select id="audioSource"></select>
+        <select id="videoSource"></select>
+      </div>
+      <div id="livePreview" class="hidden">
+      </div>
+    </div>
+    <div id="right">
+      <video id="recording" controls width="320"></video>
+      <div id="recordedClip">
+        recorded clip
+    </div>
+    </div>
+  </div>
+  <div class="buttonContainer">
+    <button id="record" class="hidden">record</button>
+    <button id="stop" class="hidden">stop</button>
+  </div>
+  <br>
+  
+</div>
+
+<form action="/rsvp" method="post" enctype="multipart/form-data">
+  <input type="hidden" name="_method" value="POST">
+  <div class="form-group">
+    <input type="text" name="movie[name]" class="form-control" id="movie-name" placeholder="name" required>
+  </div>
+
+  <div class="form-group hidden" id="upload">
+    <input type="hidden" name="movie[video]" value="<%= @movie.cached_video_data %>" id="movie-video-upload-result">
+    <input type="file" name="movie[video]" data-upload-result-element="movie-video-upload-result" data-preview-element="movie-video-preview" accept="video/*;capture=camcorder">
+  </div>
+  <div class="video-preview">
+    <a href="<%= @movie.video_url %>" id="movie-video-preview" target="_blank"><%= @movie.video_url(public: true) %></a>
+  </div>
+  <button type="submit" id="uploadStreamButton" class="btn btn-primary hidden">save</button>
+</form>
+<script type="text/javascript">
+  var recordButton, stopButton, recorder, liveStream, constraints, recording;
+  const audioSelect = document.querySelector('select#audioSource');
+  const videoSelect = document.querySelector('select#videoSource');
+  const livePreview = document.querySelector('#livePreview');
+  const upload = document.querySelector('#upload');
+  const streamContainer = document.querySelector('#streamContainer');
+  const uploadStreamButton = document.querySelector('#uploadStreamButton');
+  const hint = document.querySelector('#hint');
+  const source = document.querySelector('#source');
+  var liveVideo = document.getElementById('live');
+  var video = document.getElementById('recording');
+  var initTime; 
+
+  window.onload = function() {
+    recordButton = document.getElementById('record');
+    stopButton = document.getElementById('stop');
+    
+    if(window.MediaRecorder){
+      navigator.mediaDevices.enumerateDevices()
+        .then(gotDevices).then(getStream).catch(handleError);
+
+      audioSelect.onchange = getStream;
+      videoSelect.onchange = getStream;
+    }else{
+      hint.classList.remove('hidden');
+      upload.classList.remove('hidden');
+    }
+
+    live.ontimeupdate = function(){ 
+      if(!initTime){
+        initTime = live.currentTime;
+      }
+      livePreview.innerHTML = 'recording '+ Math.floor(live.currentTime - initTime) + 's'; 
+    };
+  };
+
+  function gotDevices(deviceInfos) {
+    for (var i = 0; i !== deviceInfos.length; ++i) {
+      var deviceInfo = deviceInfos[i];
+      var option = document.createElement('option');
+      option.value = deviceInfo.deviceId;
+      if (deviceInfo.kind === 'audioinput') {
+        option.text = deviceInfo.label ||
+          'microphone ' + (audioSelect.length + 1);
+        audioSelect.appendChild(option);
+      } else if (deviceInfo.kind === 'videoinput') {
+        option.text = deviceInfo.label || 'camera ' +
+          (videoSelect.length + 1);
+        videoSelect.appendChild(option);
+      }
+    }
+  }
+
+  function getStream() {
+    if (liveStream) {
+      liveStream.getTracks().forEach(function(track) {
+        track.stop();
+      });
+    }
+
+    constraints = {
+      audio: {
+        deviceId: { exact: audioSelect.value }
+      },
+      video: {
+        deviceId: { exact: videoSelect.value }
+      }
+    };
+
+    navigator.mediaDevices.getUserMedia(constraints).
+    then(gotStream).catch(handleError);
+  }
+
+  function gotStream(stream) {
+    liveStream = stream;
+    // liveVideo.src = URL.createObjectURL(stream);
+    liveVideo.srcObject = stream;
+    liveVideo.play();
+    streamContainer.classList.remove('hidden');
+    recordButton.classList.remove('hidden');
+    recordButton.addEventListener('click', startRecording);
+    stopButton.addEventListener('click', stopRecording);
+  }
+
+  function handleError(error) {
+    console.error('Error: ', error);
+    if(error.name == 'NotAllowedError'){
+      document.querySelector('#allowHint').classList.remove('hidden');
+    }
+    upload.classList.remove('hidden');
+    hint.classList.remove('hidden');
+    uploadStreamButton.classList.remove('hidden');
+  }
+
+
+  function startRecording() {
+    try{
+      recorder = new MediaRecorder(liveStream);
+      recorder.addEventListener('dataavailable', onRecordingReady);
+      livePreview.innerHTML = 'recordng!';
+      recordButton.classList.add('hidden');
+      stopButton.classList.remove('hidden');
+      uploadStreamButton.classList.add('hidden');
+      source.classList.add('hidden');
+      initTime = live.currentTime;
+      livePreview.classList.remove('hidden');
+      recorder.start();
+    }catch(err){
+      console.log('could not start recording!');
+    }
+  }
+
+  function stopRecording() {
+    recordButton.classList.remove('hidden');
+    stopButton.classList.add('hidden');
+    livePreview.innerHTML = '';
+    uploadStreamButton.classList.remove('hidden');
+    source.classList.remove('hidden');
+    livePreview.classList.add('hidden');
+    // stopping the recorder will eventually trigger the 'dataavailable' event
+    recorder.stop();
+  }
+
+  function onRecordingReady(e) {
+    // e.data contains a blob representing the recording
+    console.log('recording e:',e);
+    video.src = URL.createObjectURL(e.data);
+    video.play();
+    recording = e;
+    uppy.addFile(recording);
+  }
+  </script>
