@@ -177,6 +177,7 @@
     video.src = URL.createObjectURL(e.data);
     video.play();
     recording = e;
+    //document.getElementById('movie-name').value.replace(/[^a-z0-9]/gi, '_')
     uppy.addFile(recording);
   }
   </script>

@@ -35,7 +35,7 @@ document.querySelectorAll('input[type=file]').forEach(function (fileInput) {
       metadata: {
         filename:  file.name,
         size:      file.size,
-        mime_type: file.type,
+        mime_type: file.type
       }
     });
 

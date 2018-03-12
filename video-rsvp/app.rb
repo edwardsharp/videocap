@@ -1,3 +1,6 @@
+require "dotenv"
+Dotenv.load!
+
 require "roda"
 require "tilt/erb"
 
