@@ -20,7 +20,7 @@ class Shrine
       def upload(io, id, shrine_metadata: {}, **_options)
         shrine_metadata = {
           name: "#{io.metadata['record_name']} #{id}",
-          description: 'videoRSVP',
+          description: id,
           mime_type: io.metadata['mime_type'],
           parents: [@drive_public_folder_id]
         }
@@ -43,7 +43,6 @@ class Shrine
         if !@google_api_client || @google_api_client.authorization.expired?
           service = Google::Apis::DriveV3::DriveService.new
           service.client_options.application_name = ENV['APPLICATION_NAME']
-          # service.authorization = authorize
           service.authorization = Google::Auth.get_application_default('https://www.googleapis.com/auth/drive')
           @google_api_client = service
         end
@@ -51,16 +50,14 @@ class Shrine
       end
 
       def url(id, **_options)
-        # URL to the remote file, accepts options for customizing the URL
         begin
-          p "ZOMG ZOMG FILE: #{file}"
           metadata = google_api_client.get_file(
-                      google_api_client.list_files(q: "name contains '#{id}'").files[0].id,
-                      fields: 'webViewLink'
-                      )
+            google_api_client.list_files(q: "description contains '#{id}'").files[0].id,
+            fields: 'webViewLink'
+          )
           metadata.web_view_link
         rescue Exception => e
-          p "ZOMG ERR! #{e}"
+          p "URL ERR! #{e}"
         end
       end
 

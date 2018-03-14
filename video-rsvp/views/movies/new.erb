@@ -34,7 +34,7 @@
     <input type="text" name="movie[name]" class="form-control" id="movie-name" placeholder="name" required>
   </div>
   <div class="form-group">
-    <input type="text" name="movie[youtube_link]" class="form-control" id="movie-youtube_link" placeholder="youtube link" required>
+    <input type="text" name="movie[youtube_link]" class="form-control" id="movie-youtube_link" placeholder="youtube link">
   </div>
   <div class="form-group hidden" id="upload">
     <input type="hidden" name="movie[video]" value="<%= @movie.cached_video_data %>" id="movie-video-upload-result">
